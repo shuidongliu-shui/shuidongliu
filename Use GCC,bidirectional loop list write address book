@@ -1,0 +1,340 @@
+
+/*如果室友想要借你的代码无法拒绝的时候，可以在这里备注以下，希望老师可以看到*/
+
+/*如果室友想要借你的代码无法拒绝的时候，可以在这里备注以下，希望老师可以看到*/
+
+/*如果室友想要借你的代码无法拒绝的时候，可以在这里备注以下，希望老师可以看到*/
+
+/*如果室友想要借你的代码无法拒绝的时候，可以在这里备注以下，希望老师可以看到*/
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define HAVE_SAME_NAME    1
+#define NO_SAME_NAME     0
+
+struct address_book {
+    int number;
+    char name[20];   //姓名
+    char phone_number[20]; //电话号码
+    struct address_book *next;
+    struct address_book *prev;
+};
+
+int count = 0;
+
+struct address_book *head = NULL;
+
+/*create head node*/
+void init(void)  
+{
+    printf("%s\n", __func__);
+    head = (struct address_book *)malloc(sizeof(struct address_book));//在内存中为结构体分配内存并返回该内存块的首地址在将其强制转换为结构体类型再赋值给头节点
+    head->next = head;   
+    head->prev = head;
+}
+
+void list_all_address_book_information(void)
+{
+    struct address_book *pos = NULL;
+    printf("%s\n", __func__);
+    printf("\n\n\n\tname\t\t\tphone_number\t\t\t\n");
+    for(pos = head->next; pos != head; pos = pos->next)
+    {
+        printf("%d\t%s\t\t\t%s\t\t\t\n", pos->number, pos->name, pos->phone_number);
+    }
+    printf("\n\n\n%s : end\n", __func__);
+}
+
+
+int save()
+{
+	struct address_book * pos = NULL;
+	printf("%s\n", __func__);
+	FILE *fpsave = fopen("com.txt","w");
+	if(fpsave == NULL)
+	{
+		return 0;
+	}
+	for(pos = head->next; pos != head; pos = pos->next)
+	{
+		fprintf(fpsave,"%s ",pos->name);
+		fprintf(fpsave,"%s ",pos->phone_number);
+
+	}
+	rewind(fpsave);
+	fclose(fpsave);
+}
+int read()
+{
+	struct address_book * pos = NULL;
+        printf("%s\n", __func__);
+	FILE *fpread = fopen("com.txt","r");
+	printf("文件读取成功\n");
+	if(fpread == NULL)
+        {
+		printf("文件为空\n");
+                return 0;
+        }
+	printf("文件不为空，继续执行\n");
+	int k = 0;	
+	while(k < 4){
+																													
+		struct address_book * new_node = (struct address_book *)malloc(sizeof(struct address_book));
+    		struct address_book * last_node = head->prev;
+		last_node->next = new_node;
+		new_node->prev = last_node;
+    
+	
+		head->prev = new_node;
+    
+		new_node->next = head;
+		k = k+1;
+	}
+	printf("已创建新节点\n");
+	for(pos = head->next; pos != head; pos = pos->next)
+        {
+//		printf("该程序执行");
+                fscanf(fpread,"%s",pos->name);
+                fscanf(fpread,"%s",pos->phone_number);
+//		printf("pos->name is %s\n",pos->name);
+//		printf("pos->phone_number is %s\n",pos->phone_number);
+
+        }
+//	printf("该程序未执行/n");
+	fclose(fpread);
+
+
+
+
+}
+
+int have_same_name(char *name)
+{
+    struct address_book *pos = NULL;
+    for(pos = head->next; pos != head; pos = pos->next)
+    {
+        if(strcmp(pos->name, name) == 0){
+            return HAVE_SAME_NAME;
+        }
+    }
+    return NO_SAME_NAME;
+}
+
+void delete_address_book_fixed_count(void)
+{
+    struct address_book *pos = NULL; 
+    int i = 0;
+    count--;
+    for(pos = head->next, i = 1; pos != head; pos = pos->next, i++)
+    {
+        pos->number = i;
+    }
+    i--;
+    if(i != count){
+        printf("i = %d\t, count = %d\n", i, count);
+        printf("count error\n");
+    }
+    list_all_address_book_information();
+
+}
+
+void add_address_book_information(void)
+{
+    char new_name[20] = {0};
+    char new_phone_number[20] = {0};
+    memset(new_name, 0, sizeof(new_name));
+    memset(new_phone_number, 0, sizeof(new_phone_number));
+
+    printf("%s\n", __func__);
+
+    printf("enter the name:\n");
+    scanf("%s", new_name);
+
+    if(have_same_name(new_name)){
+        printf("hava same name\n");
+        goto have_same_name;
+    }
+
+    printf("enter the phone number:\n");
+    scanf("%s", new_phone_number);
+
+    struct address_book * new_node = (struct address_book *)malloc(sizeof(struct address_book));
+    struct address_book * last_node = head->prev;
+    last_node->next = new_node;
+    new_node->prev = last_node;
+    head->prev = new_node;
+    new_node->next = head;
+
+    count++;
+
+    new_node->number = count;
+    memset(new_node->name, 0, sizeof(new_node->name));
+    memset(new_node->phone_number, 0, sizeof(new_phone_number));
+    strcpy(new_node->name, new_name);
+    strcpy(new_node->phone_number, new_phone_number);
+
+    printf("add address book information ok!\n");
+
+    list_all_address_book_information();
+
+have_same_name:
+    return ;
+}
+
+void delete_address_book_information()
+{
+    struct address_book * pos = NULL;
+    char name[20];
+    printf("%s\n", __func__);
+
+    memset(name, 0, sizeof(name));
+    printf("enter the name that you want delete:\n");
+    scanf("%s", name);
+
+    for(pos = head->next; pos != head; pos = pos->next)
+    {
+        if(strcmp(pos->name, name) == 0){
+            printf("delete\t%d\t%s\t\t\t%s\t\t\n", pos->number, pos->name, pos->phone_number);
+            pos->prev->next = pos->next;
+            pos->next->prev = pos->prev;
+            free(pos);
+            delete_address_book_fixed_count();
+            return;
+        }
+    }
+
+    printf("no the same name, pleace check it again\n");
+
+}
+
+void search_phone_number(void)
+{
+    struct address_book * pos = NULL;
+    char name[20];
+    printf("%s\n", __func__);
+
+    memset(name, 0, sizeof(name));
+
+    printf("enter the name that want to search:\n");
+    scanf("%s", name);
+
+    for(pos = head->next; pos != head; pos = pos->next)
+    {
+        if(strcmp(pos->name, name) == 0){
+            printf("find the name:\n");
+            printf("\tname\t\t\tphone_number\t\t\n");
+            printf("%d\t%s\t\t\t%s\t\t\t\n", pos->number, pos->name, pos->phone_number);
+            return;
+        }
+    }
+    printf("sorry, can not find the name infomation\n");
+
+}
+
+void modify_phone_number(void)
+{
+    struct address_book * pos = NULL;
+    char name [20];
+    char phone_number [20];
+
+    printf("%s\n", __func__);
+
+    memset(name, 0, sizeof(name));
+
+    printf("enter the name that want to modify:\n");
+    scanf("%s", name);
+    printf("enter the phone_number that want to modify:\n");
+    scanf("%s", phone_number);
+
+    for(pos = head->next; pos != head; pos = pos->next)
+    {
+        if(strcmp(pos->name, name) == 0){
+            printf("find the name and modify the phone_number:\n");
+            strcpy(pos->phone_number,phone_number);
+            printf("\tname\t\t\tphone_number\t\t\t\n");
+            printf("\t%s\t\t\t%s\t\t\t\n", pos->name, pos->phone_number);
+            return;
+        }
+    }
+    printf("sorry, can not find the name information\n");
+}
+
+void free_all_memory()
+{
+    struct address_book * pos = head->next;
+    struct address_book * pos_next = NULL;
+    printf("%s\n", __func__);
+    for(; pos != head; )
+    {
+        //pos_next = pos->next;
+        head->next = pos->next;
+        pos->next->prev = head;
+        printf("\tdelete node->number = %d\n", pos->number);
+        free(pos);
+        pos = head->next;
+    }
+    printf("\tdelete head node\n");
+    free(head);
+}
+
+int main(void)
+{
+    int user_select = 0;
+
+    init();
+
+    printf("我的通信录");
+    while(1){
+        printf("function select\n");
+        printf("\t1. add an address book information\n\t2. delete an address book information\n\t3. search phone number\n\t4. modify phone number\n\t5. list all address book information\n\t6. save the data\n\t7. read the data\n\t0. quit the application\n");
+        scanf("%d", &user_select);
+        switch(user_select){
+            case 0:{
+                free_all_memory();
+                printf("the application will quit\n");
+                return 0;
+            }           
+            case 1:{
+                add_address_book_information();
+                break;
+            }
+            case 2:{
+                delete_address_book_information();
+                break;
+            }       
+            case 3:{
+                search_phone_number();
+                break;
+            }
+            case 4:{
+                modify_phone_number();
+                break;
+            }
+            case 5:{
+                list_all_address_book_information();
+                break;
+            }
+	    case 6:{
+			   save();
+			   break;
+		   }
+	    case 7:{
+			   read();
+			   break;
+		   }
+            default:{
+                printf("enter error\n");
+                free_all_memory();
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+
+
